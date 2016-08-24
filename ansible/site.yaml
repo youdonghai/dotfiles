@@ -1,0 +1,10 @@
+# vim:ft=ansible:
+---
+- name: setup work environment
+  hosts: all
+  roles:
+    - common
+    - terminal
+    - i3wm
+
+

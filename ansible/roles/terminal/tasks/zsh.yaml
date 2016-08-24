@@ -1,0 +1,23 @@
+# vim:ft=ansible:
+---
+
+- name: install zsh
+  become: true
+  package:
+    name: zsh
+    state: latest
+
+- name: clone oh-my-zsh repo
+  git:
+    repo: https://github.com/robbyrussell/oh-my-zsh.git
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh"
+
+- name: install zshrc
+  copy:
+    src: files/zshrc
+    dest: "{{ ansible_env.HOME }}/.zshrc"
+
+- name: set zsh as default shell
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/zsh

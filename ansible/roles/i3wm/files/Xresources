@@ -1,0 +1,14 @@
+
+XTerm*locale: zh_CN.UTF-8
+xterm*termName: xterm-256color
+XTerm*locale: true
+XTerm*metaSendsEscape: true
+XTerm*selectToClipboard: true
+xterm*faceName: Consolas:pixelsize=15
+! Chinese font
+xterm*faceNameDoublesize: WenQuanYi Micro Hei:pixelsize=14
+
+! #include ".Xresources.d/solarized.dark"
+! #include ".Xresources.d/tomorrownighteighties"
+#include ".Xresources.d/donghai.dark"
+

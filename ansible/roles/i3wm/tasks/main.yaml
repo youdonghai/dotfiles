@@ -1,0 +1,54 @@
+# vim:ft=ansible:
+---
+
+- name: config path
+  file:
+    dest: "{{ ansible_env.HOME }}/.config/i3"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+
+- name: install i3 config
+  copy:
+    src: files/i3wm_config
+    dest: "{{ ansible_env.HOME }}/.config/i3/config"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
+- name: install myi3status
+  copy:
+    src: files/myi3status
+    dest: "{{ ansible_env.HOME }}/bin/myi3status"
+    mode: 0755
+    owner: "{{ ansible_user }}"
+
+- name: install xinitrc
+  copy:
+    src: files/xinitrc
+    dest: "{{ ansible_env.HOME }}/.xinitrc"
+
+- name: create Xresources path
+  file:
+    dest: "{{ ansible_env.HOME }}/.Xresources.d"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+
+- name: install Xresources config
+  copy:
+    src: files/Xresources
+    dest: "{{ ansible_env.HOME }}/.Xresources"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
+- name: install Xresources color
+  copy:
+    src: files/donghai.dark
+    dest: "{{ ansible_env.HOME }}/.Xresources.d/donghai.dark"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
+
+
+
+
