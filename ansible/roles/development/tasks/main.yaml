@@ -40,7 +40,7 @@
   copy:
     src: files/tmuxinit
     dest: "{{ ansible_env.HOME }}/bin/tmuxinit"
-    mode: 0644
+    mode: 0744
     owner: "{{ ansible_user }}"
 
 - name: install ideavimrc
@@ -57,3 +57,9 @@
     mode: 0744
     owner: "{{ ansible_user }}"
 
+- name: install delete merged branch script
+  copy:
+    src: files/delete_merged_branchs
+    dest: "{{ ansible_env.HOME }}/bin/delete_merged_branchs"
+    mode: 0744
+    owner: "{{ ansible_user }}"
