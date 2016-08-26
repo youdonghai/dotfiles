@@ -5,7 +5,7 @@
   become: true
   package:
     name: zsh
-    state: latest
+    state: present
 
 - name: clone oh-my-zsh repo
   git:

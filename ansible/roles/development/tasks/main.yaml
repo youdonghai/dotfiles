@@ -1,6 +1,5 @@
 # vim:ft=ansible:
 ---
-- include: zsh.yaml
 
 - name: create bin path
   file:
@@ -14,6 +13,13 @@
     src: files/to
     dest: "{{ ansible_env.HOME }}/bin/to"
     mode: 0744
+    owner: "{{ ansible_user }}"
+
+- name: create ssh config path
+  file:
+    dest: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    mode: 0755
     owner: "{{ ansible_user }}"
 
 - name: install ssh config
@@ -34,17 +40,6 @@
   copy:
     src: files/ideavimrc
     dest: "{{ ansible_env.HOME }}/.ideavimrc"
-    mode: 0644
-    owner: "{{ ansible_user }}"
-
-- name: debug vars
-  debug:
-    msg: "{{ VIM_USE_YCM }}"
-
-- name: install vimrc
-  template:
-    src: templates/vimrc
-    dest: "{{ ansible_env.HOME }}/.vimrc"
     mode: 0644
     owner: "{{ ansible_user }}"
 

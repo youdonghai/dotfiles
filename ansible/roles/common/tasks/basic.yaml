@@ -1,0 +1,15 @@
+# vim:ft=ansible:
+---
+
+- name: install git
+  become: true
+  package:
+    name: git
+    state: present
+
+- name: install wget
+  become: true
+  package:
+    name: wget
+    state: present
+

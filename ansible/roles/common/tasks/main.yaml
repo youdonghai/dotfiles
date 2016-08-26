@@ -1,14 +1,7 @@
 # vim:ft=ansible:
 ---
 
-- name: install git
-  become: true
-  package:
-    name: git
-    state: latest
+- include: basic.yaml
+- include: zsh.yaml
+- include: vim.yaml
 
-- name: install wget
-  become: true
-  package:
-    name: wget
-    state: latest
