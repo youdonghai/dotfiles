@@ -36,6 +36,13 @@
     mode: 0644
     owner: "{{ ansible_user }}"
 
+- name: install tmux init script
+  copy:
+    src: files/tmuxinit
+    dest: "{{ ansible_env.HOME }}/bin/tmuxinit"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
 - name: install ideavimrc
   copy:
     src: files/ideavimrc

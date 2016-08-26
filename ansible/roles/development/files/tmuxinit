@@ -1,0 +1,13 @@
+#! /bin/bash
+
+sn=donghai
+
+tmux new-session -s "$sn" -d
+
+for i in {2..20}; do
+    tmux new-window -t "$sn:$i"
+done
+
+tmux select-window -t "$sn:1"
+tmux -2 attach-session -t "$sn"
+
