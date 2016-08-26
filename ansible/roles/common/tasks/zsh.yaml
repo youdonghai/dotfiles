@@ -19,6 +19,13 @@
     mode: 0644
     owner: "{{ ansible_user }}"
 
+- name: install dircolors
+  copy:
+    src: files/dircolors
+    dest: "{{ ansible_env.HOME }}/.dircolors"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
 - name: install zshrc
   copy:
     src: files/zshrc

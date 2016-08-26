@@ -83,8 +83,16 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
-export PATH=${HOME}/bin/:$PATH
 
+setopt no_share_history
+
+export PATH=${HOME}/bin/:$PATH
 export GOROOT=$HOME/go
 export GOPATH=$HOME/gowork
 export PATH=$PATH:$GOROOT/bin
+
+if [ -x /usr/bin/dircolors  ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+fi
+
+
