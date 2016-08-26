@@ -12,6 +12,13 @@
     repo: https://github.com/robbyrussell/oh-my-zsh.git
     dest: "{{ ansible_env.HOME }}/.oh-my-zsh"
 
+- name: install my zsh theme
+  copy:
+    src: files/donghai.zsh-theme
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/themes/donghai.zsh-theme"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
 - name: install zshrc
   copy:
     src: files/zshrc
