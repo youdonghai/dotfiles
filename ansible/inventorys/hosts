@@ -1,2 +1,3 @@
 [work]
 localhost ansible_user=youdonghai
+203.117.155.172 ansible_user=ld-youd VIM_USE_YCM=False

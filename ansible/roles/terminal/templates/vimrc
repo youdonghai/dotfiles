@@ -358,7 +358,7 @@ Bundle 'scrooloose/nerdcommenter'
 Bundle 'majutsushi/tagbar'
 nmap <leader>t :TagbarToggle<CR>
 
-
+{% if VIM_USE_YCM %}
 Bundle 'Valloric/YouCompleteMe'
 let g:ycm_confirm_extra_conf=0
 let g:syntastic_always_populate_loc_list=1
@@ -378,6 +378,7 @@ let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
 " for debug
 " let g:ycm_server_use_vim_stdout = 1
 " let g:ycm_server_log_level = 'debug'
+{% endif %}
 
 " Enable omni completion.
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS

@@ -37,9 +37,13 @@
     mode: 0644
     owner: "{{ ansible_user }}"
 
+- name: debug vars
+  debug:
+    msg: "{{ VIM_USE_YCM }}"
+
 - name: install vimrc
-  copy:
-    src: files/vimrc
+  template:
+    src: templates/vimrc
     dest: "{{ ansible_env.HOME }}/.vimrc"
     mode: 0644
     owner: "{{ ansible_user }}"

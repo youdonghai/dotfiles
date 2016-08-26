@@ -16,8 +16,14 @@
   copy:
     src: files/zshrc
     dest: "{{ ansible_env.HOME }}/.zshrc"
+    mode: 0644
+    owner: "{{ ansible_user }}"
 
 - name: set zsh as default shell
-  user:
-    name: "{{ ansible_user }}"
-    shell: /bin/zsh
+  copy:
+    src: files/profile
+    dest: "{{ ansible_env.HOME }}/.profile"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
+
