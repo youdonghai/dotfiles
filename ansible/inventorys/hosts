@@ -1,5 +1,6 @@
 [development]
-localhost ansible_user=youdonghai VIM_USE_YCM=True
+localhost ansible_user=youdonghai
 
-[other]
+[test]
 
+[live]

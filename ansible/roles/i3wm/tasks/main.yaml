@@ -1,7 +1,7 @@
 # vim:ft=ansible:
 ---
 
-- name: config path
+- name: create config path
   file:
     dest: "{{ ansible_env.HOME }}/.config/i3"
     state: directory

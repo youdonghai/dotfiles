@@ -2,5 +2,3 @@
 ansible_user: donghai
 ansible_become_pass: 1
 
-VIM_USE_YCM: False
-

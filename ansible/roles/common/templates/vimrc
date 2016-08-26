@@ -358,7 +358,7 @@ Bundle 'scrooloose/nerdcommenter'
 Bundle 'majutsushi/tagbar'
 nmap <leader>t :TagbarToggle<CR>
 
-{% if VIM_USE_YCM %}
+{% if 'development' in group_names %}
 Bundle 'Valloric/YouCompleteMe'
 let g:ycm_confirm_extra_conf=0
 let g:syntastic_always_populate_loc_list=1

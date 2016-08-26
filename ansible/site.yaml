@@ -9,4 +9,5 @@
   hosts: development
   roles:
     - development
+    - i3wm
 
