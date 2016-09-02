@@ -7,6 +7,18 @@
     name: vim
     state: present
 
+- name: create vim bundle path
+  file:
+    dest: "{{ ansible_env.HOME }}/.vim/bundle"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+
+- name: install Vundle
+  git:
+    repo: https://github.com/VundleVim/Vundle.vim.git
+    dest: "{{ ansible_env.HOME }}/.vim/bundle/Vundle.vim"
+
 - name: install vimrc
   template:
     src: templates/vimrc

@@ -34,10 +34,18 @@
     owner: "{{ ansible_user }}"
 
 - name: set zsh as default shell
+  become: true
+  register: zsh_as_default_shell
+  ignore_errors: True
+  user:
+    name: "{{ ansible_user }}"
+    shell: /usr/bin/zsh
+
+- name: set zsh as default shell by profile
   copy:
     src: files/profile
     dest: "{{ ansible_env.HOME }}/.profile"
     mode: 0644
     owner: "{{ ansible_user }}"
-
+  when: "'failed' in zsh_as_default_shell and zsh_as_default_shell.failed"
 

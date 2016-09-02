@@ -91,8 +91,11 @@ export GOROOT=$HOME/go
 export GOPATH=$HOME/gowork
 export PATH=$PATH:$GOROOT/bin
 
-if [ -x /usr/bin/dircolors  ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-fi
+#if [ -x /usr/bin/dircolors  ]; then
+#    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+#fi
+
+setopt autolist
+unsetopt menucomplete
 
 
