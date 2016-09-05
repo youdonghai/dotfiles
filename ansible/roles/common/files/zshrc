@@ -98,4 +98,10 @@ export PATH=$PATH:$GOROOT/bin
 setopt autolist
 unsetopt menucomplete
 
+bindkey "\033[1~" beginning-of-line
+bindkey "\033[4~" end-of-line
+
+bindkey -v
+bindkey '^R' history-incremental-search-backward
+
 

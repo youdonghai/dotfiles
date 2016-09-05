@@ -26,3 +26,5 @@
     mode: 0644
     owner: "{{ ansible_user }}"
 
+- name: install vim plugin
+  command: vim +PluginInstall +qall
