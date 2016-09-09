@@ -8,7 +8,7 @@ export ZSH=$HOME/.oh-my-zsh
 ZSH_THEME="donghai"
 
 # Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+CASE_SENSITIVE="true"
 
 # Uncomment the following line to use hyphen-insensitive completion. Case
 # sensitive completion must be off. _ and - will be interchangeable.
@@ -90,6 +90,7 @@ export PATH=${HOME}/bin/:$PATH
 export GOROOT=$HOME/go
 export GOPATH=$HOME/gowork
 export PATH=$PATH:$GOROOT/bin
+export PATH=$PATH:$HOME/.gotools
 
 #if [ -x /usr/bin/dircolors  ]; then
 #    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
