@@ -100,7 +100,7 @@ if has('statusline')
     " Broken down into easily includeable segments
     set statusline=%<%f\                     " Filename
     set statusline+=%w%h%m%r                 " Options
-    if !exists('g:override_spf13_bundles')
+    if exists("*fugitive#statusline")
         set statusline+=%{fugitive#statusline()} " Git Hotness
     endif
     set statusline+=\ [%{&ff}/%Y]            " Filetype
@@ -290,7 +290,9 @@ let g:solarized_termcolors=256
 let g:solarized_termtrans=1
 let g:solarized_contrast="normal"
 let g:solarized_visibility="normal"
-colorscheme solarized             " Load a colorscheme
+if isdirectory(expand("$HOME/.vim/bundle/vim-colors-solarized"))
+    colorscheme solarized             " Load a colorscheme
+endif
 "colorscheme Tomorrow-Night-Eighties
 highlight Normal ctermbg=none
 

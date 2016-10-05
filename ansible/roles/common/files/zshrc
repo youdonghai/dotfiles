@@ -105,4 +105,5 @@ bindkey "\033[4~" end-of-line
 bindkey -v
 bindkey '^R' history-incremental-search-backward
 
+eval "$(thefuck --alias)"
 
