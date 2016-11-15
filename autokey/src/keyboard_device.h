@@ -12,18 +12,17 @@
 #include <vector>
 #include <linux/input.h>
 
-class KeyboardDevice
-{
+class KeyboardDevice {
 public:
     static std::vector<std::string> GetKeyboardDeviceList();
 
     KeyboardDevice(std::string kbd_event_path, bool grab);
+
     virtual ~KeyboardDevice();
 
-    bool getKey(struct input_event* key);
+    bool getKey(struct input_event *key);
 
-    bool isOK()
-    {
+    bool isOK() {
         return m_kbd_event_fh >= 0;
     }
 

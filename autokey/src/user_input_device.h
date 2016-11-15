@@ -11,15 +11,15 @@
 
 #define USERDEV_FILENAME "/dev/uinput"
 
-class UserInputDevice{
+class UserInputDevice {
 public:
     UserInputDevice(std::string name);
+
     ~UserInputDevice();
 
-    bool PutKey(struct input_event* key);
+    bool PutKey(struct input_event *key);
 
-    bool isOK()
-    {
+    bool isOK() {
         return m_user_device_fh >= 0;
     }
 

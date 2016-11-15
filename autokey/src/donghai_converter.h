@@ -13,42 +13,58 @@
 #include "converter.h"
 #include "stdlib.h"
 
-const int MAX_INPUT_BUFFER_SIZE = 100;
 
-class DonghaiConverter : public Converter
-{
+
+class DonghaiConverter : public Converter {
 public:
     DonghaiConverter();
+
     virtual ~DonghaiConverter();
 
 protected:
-    virtual bool handleInput(struct input_event* input);
-    bool handleKeyInput(struct input_event* input);
-    bool handleMscInput(struct input_event* input);
-    bool handleMetaKeyInput(struct input_event* input);
-    bool handleSpecialKey(struct input_event* input);
-    void handleNavKeyI(struct input_event* input);
-    void enterNavMode();
-    void leaveNavMode();
+    virtual bool handleInput(struct input_event *input);
 
-    void outputKey(unsigned short code, int value);
-    void keyDown(unsigned short code, bool msc = true, bool syn = true);
-    void keyRelease(unsigned short code, bool msc = true, bool syn = true);
+    bool handleMscInput(struct input_event *input);
+    bool handleKeyInput(struct input_event *input);
+    bool handleSynInput(struct input_event *input);
+    bool isSpecialKey(struct input_event *input) {
+        uint16_t key_code = 0;
+        if (input->type == EV_KEY) {
+            key_code = input->code;
+        } else if (input->type == EV_MSC) {
+            key_code = (uint16_t) input->value;
+        }
+        switch (key_code) {
+            case KEY_CAPSLOCK:
+            case KEY_H:
+            case KEY_J:
+            case KEY_K:
+            case KEY_L:
+            case KEY_I:
+            case KEY_LEFTBRACE:
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+    void updateKeyFlags(int *flags, uint16_t key_code, int32_t key_val);
+    void setKeyFlags(int *flags, int32_t bit, int32_t key_val);
+    void handleCapsLock(struct input_event *key_event);
+    void enterDonghaiMode(struct input_event *key_event);
+    void leaveDonghaiMode();
+    void handleMapKey(struct input_event *key_event, uint16_t map_key_code, int32_t original_bit, int32_t map_bit);
+    void handleInsertKey(struct input_event *key_event);
+    void normalKeyOutPut(struct input_event *key_event, int32_t bit);
+
+    void addOutput(struct input_event *output, bool setTime = true);
 
 private:
+    int m_physic_key_flags;
+    int m_logic_key_flags;
 
-    int m_key_flags;
-    bool m_nav_mode;
-    int m_skip_key_flags;
-
-    struct input_event m_input_buffer[MAX_INPUT_BUFFER_SIZE];
-    int m_input_buffer_index;
-    struct input_event * m_cached_msc_event;
-
-    struct input_event * getInputEvent(unsigned short type, unsigned short code, int value);
-
-    std::map<int32_t, int> m_meta_key_map;
-    std::map<int32_t, int> m_special_key_map;
+    bool m_send_syn_event;
+    bool m_donghai_mode;
 };
 
 #endif /* DONGHAI_CONVERTER_H_ */

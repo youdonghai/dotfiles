@@ -6,8 +6,7 @@
  */
 
 #include "donghai_converter.h"
-#include <string.h>
-#include <stdio.h>
+
 
 #define BIT_LEFTCTRL (1 << 0)
 #define BIT_RIGHTCTRL (1 << 1)
@@ -23,271 +22,308 @@
 #define BIT_I (1 << 11)
 #define BIT_LEFTBRACE (1 << 12)
 
-#define IS_KEY_DOWN(key_bit) ((m_key_flags & key_bit) != 0)
-#define ONLY_CAPSLOCK_ON() (m_key_flags == BIT_CAPSLOCK)
+#define BIT_LEFT (1 << 13)
+#define BIT_DOWN (1 << 14)
+#define BIT_UP (1 << 15)
+#define BIT_RIGHT (1 << 16)
+#define BIT_INSERT (1 << 17)
+#define BIT_ESC (1 << 18)
+
+#define IS_LOGIC_KEY_DOWN(key_bit) ((m_logic_key_flags & key_bit) != 0)
+#define ONLY_CAPSLOCK_DOWN() (m_physic_key_flags == BIT_CAPSLOCK)
 
 
-DonghaiConverter::DonghaiConverter()
-{
-    m_key_flags = 0;
-    m_nav_mode = false;
-    m_skip_key_flags = 0;
+DonghaiConverter::DonghaiConverter() {
+    m_physic_key_flags = 0;
+    m_logic_key_flags = 0;
+    m_send_syn_event = false;
+    m_donghai_mode = false;
+}
 
-    for (int i = 0; i < MAX_INPUT_BUFFER_SIZE; ++i)
-    {
-        memset(&m_input_buffer[i], 0x0, sizeof(m_input_buffer[i]));
+DonghaiConverter::~DonghaiConverter() {
+}
+
+bool DonghaiConverter::handleInput(struct input_event *input) {
+    switch (input->type) {
+        case EV_MSC:
+            return handleMscInput(input);
+        case EV_KEY:
+            return handleKeyInput(input);
+        case EV_SYN:
+            return handleSynInput(input);
+        default:
+            addOutput(input);
+            break;
     }
-    m_input_buffer_index = 0;
-    m_cached_msc_event = getInputEvent(4, 4, 0);
-
-    m_special_key_map[KEY_H] = BIT_H;
-    m_special_key_map[KEY_J] = BIT_J;
-    m_special_key_map[KEY_K] = BIT_K;
-    m_special_key_map[KEY_L] = BIT_L;
-    m_special_key_map[KEY_I] = BIT_I;
-    m_special_key_map[KEY_LEFTBRACE] = BIT_LEFTBRACE;
-
-    m_meta_key_map[KEY_LEFTCTRL] = BIT_LEFTCTRL;
-    m_meta_key_map[KEY_RIGHTCTRL] = BIT_RIGHTCTRL;
-    m_meta_key_map[KEY_LEFTSHIFT] = BIT_LEFTSHIFT;
-    m_meta_key_map[KEY_RIGHTSHIFT] = BIT_RIGHTSHIFT;
-    m_meta_key_map[KEY_LEFTALT] = BIT_LEFTALT;
-    m_meta_key_map[KEY_RIGHTALT] = BIT_RIGHTALT;
-    m_meta_key_map[KEY_CAPSLOCK] = BIT_CAPSLOCK;
+    return true;
 }
 
-DonghaiConverter::~DonghaiConverter()
-{
-}
-
-bool DonghaiConverter::handleInput(struct input_event* input)
-{
-    switch (input->type)
-    {
-    case EV_KEY:
-        /* Key events are manipulated */
-        return handleKeyInput(input);
-    case EV_MSC:
-        return handleMscInput(input);
-    default:
-        /* For other events, simply send the event as it is */
-        addOutput(input);
+bool DonghaiConverter::handleMscInput(struct input_event *input) {
+    if (!isSpecialKey(input)) {
+        addOutput(input, false);
         return true;
     }
+    return false;
 }
 
-bool DonghaiConverter::handleMscInput(struct input_event *input)
-{
-    if (input->value == KEY_CAPSLOCK)
-    {
-        input->value = KEY_LEFTCTRL;
+bool DonghaiConverter::handleKeyInput(struct input_event *input) {
+    if (!isSpecialKey(input)) {
+        leaveDonghaiMode();
+        addOutput(input, false);
+        m_send_syn_event = true;
+        updateKeyFlags(&m_physic_key_flags, input->code, input->value);
+        return true;
     }
-    m_cached_msc_event = getInputEvent(input->type, input->code, input->value);
+
+    switch (input->code) {
+        case KEY_CAPSLOCK:
+            handleCapsLock(input);
+            break;
+        case KEY_H:
+            handleMapKey(input, KEY_LEFT, BIT_H, BIT_LEFT);
+            break;
+        case KEY_J:
+            handleMapKey(input, KEY_DOWN, BIT_J, BIT_DOWN);
+            break;
+        case KEY_K:
+            handleMapKey(input, KEY_UP, BIT_K, BIT_UP);
+            break;
+        case KEY_L:
+            handleMapKey(input, KEY_RIGHT, BIT_L, BIT_RIGHT);
+            break;
+        case KEY_I:
+            handleInsertKey(input);
+            break;
+        case KEY_LEFTBRACE:
+            handleMapKey(input, KEY_ESC, BIT_LEFTBRACE, BIT_ESC);
+            break;
+        default:
+            break;
+    }
+    updateKeyFlags(&m_physic_key_flags, input->code, input->value);
     return true;
 }
 
-bool DonghaiConverter::handleKeyInput(struct input_event* input)
-{
-    switch (input->code)
-    {
-    case KEY_LEFTCTRL:
-    case KEY_RIGHTCTRL:
-    case KEY_LEFTSHIFT:
-    case KEY_RIGHTSHIFT:
-    case KEY_LEFTALT:
-    case KEY_RIGHTALT:
-    case KEY_CAPSLOCK:
-        return handleMetaKeyInput(input);
-    case KEY_H:
-    case KEY_J:
-    case KEY_K:
-    case KEY_L:
-    case KEY_I:
-    case KEY_LEFTBRACE:
-        return handleSpecialKey(input);
-    default:
-        leaveNavMode();
-        addOutput(m_cached_msc_event);
+bool DonghaiConverter::handleSynInput(struct input_event *input) {
+    if (m_send_syn_event) {
         addOutput(input);
-        break;
+        m_send_syn_event = false;
     }
-    return true;
+    return false;
 }
 
-bool DonghaiConverter::handleMetaKeyInput(struct input_event* input)
-{
-    int bit = m_meta_key_map[input->code];
+void DonghaiConverter::updateKeyFlags(int *flags, uint16_t key_code, int32_t key_val) {
+    if (key_val == 2) {
+        return;
+    }
+    switch (key_code) {
+        case KEY_LEFTCTRL:
+            setKeyFlags(flags, BIT_LEFTCTRL, key_val);
+            break;
+        case KEY_RIGHTCTRL:
+            setKeyFlags(flags, BIT_RIGHTCTRL, key_val);
+            break;
+        case KEY_LEFTSHIFT:
+            setKeyFlags(flags, BIT_LEFTSHIFT, key_val);
+            break;
+        case KEY_RIGHTSHIFT:
+            setKeyFlags(flags, BIT_RIGHTSHIFT, key_val);
+            break;
+        case KEY_LEFTALT:
+            setKeyFlags(flags, BIT_LEFTALT, key_val);
+            break;
+        case KEY_RIGHTALT:
+            setKeyFlags(flags, BIT_RIGHTALT, key_val);
+            break;
+        case KEY_CAPSLOCK:
+            setKeyFlags(flags, BIT_CAPSLOCK, key_val);
+            break;
+        case KEY_H:
+            setKeyFlags(flags, BIT_H, key_val);
+            break;
+        case KEY_J:
+            setKeyFlags(flags, BIT_J, key_val);
+            break;
+        case KEY_K:
+            setKeyFlags(flags, BIT_K, key_val);
+            break;
+        case KEY_L:
+            setKeyFlags(flags, BIT_L, key_val);
+            break;
+        case KEY_I:
+            setKeyFlags(flags, BIT_I, key_val);
+            break;
+        case KEY_LEFTBRACE:
+            setKeyFlags(flags, BIT_LEFTBRACE, key_val);
+            break;
+        case KEY_LEFT:
+            setKeyFlags(flags, BIT_LEFT, key_val);
+            break;
+        case KEY_DOWN:
+            setKeyFlags(flags, BIT_DOWN, key_val);
+            break;
+        case KEY_UP:
+            setKeyFlags(flags, BIT_UP, key_val);
+            break;
+        case KEY_RIGHT:
+            setKeyFlags(flags, BIT_RIGHT, key_val);
+            break;
+        case KEY_INSERT:
+            setKeyFlags(flags, BIT_INSERT, key_val);
+            break;
+        case KEY_ESC:
+            setKeyFlags(flags, BIT_ESC, key_val);
+            break;
+        default:
+            break;
+    }
+}
 
-    if (input->code == KEY_CAPSLOCK)
-    {
-        input->code = KEY_LEFTCTRL;
-        if (input->value == 0)
-        {
-            leaveNavMode();
+void DonghaiConverter::setKeyFlags(int *flags, int32_t bit, int32_t key_val) {
+    if (0 == key_val) {
+        *flags &= ~bit;
+    } else if (1 == key_val) {
+        *flags |= bit;
+    }
+}
+
+void DonghaiConverter::handleCapsLock(struct input_event *key_event) {
+    if (key_event->value == 0) {
+        leaveDonghaiMode();
+    }
+    if (IS_LOGIC_KEY_DOWN(BIT_LEFTCTRL)) {
+        if (key_event->value == 1) {
+            return;
+        }
+        doKeyEvent(KEY_LEFTCTRL, key_event->value, true, false);
+        m_send_syn_event = true;
+        return;
+    } else {
+        if (key_event->value == 1) {
+            doKeyEvent(KEY_LEFTCTRL, 1, true, false);
+            m_send_syn_event = true;
         }
     }
-
-    if (input->value == 1)
-        m_key_flags |= bit;
-    else if (input->value == 0)
-        m_key_flags &= ~bit;
-
-    addOutput(m_cached_msc_event);
-    addOutput(input);
-    return true;
 }
 
-void DonghaiConverter::enterNavMode()
-{
-    if (m_nav_mode)
-    {
-        return;
+void DonghaiConverter::enterDonghaiMode(struct input_event *key_event) {
+    if (ONLY_CAPSLOCK_DOWN() && key_event->value == 1) {
+        if (m_donghai_mode) {
+            return;
+        }
+        if (IS_LOGIC_KEY_DOWN(BIT_LEFTCTRL)) {
+            doKeyEvent(KEY_LEFTCTRL, 0);
+        }
+        m_donghai_mode = true;
     }
-    keyRelease(KEY_LEFTCTRL);
-    m_nav_mode = true;
 }
-void DonghaiConverter::leaveNavMode()
-{
-    if (!m_nav_mode)
-    {
+
+void DonghaiConverter::leaveDonghaiMode() {
+    if (!m_donghai_mode) {
         return;
     }
 
-    if (IS_KEY_DOWN(BIT_H))
-    {
-        m_skip_key_flags |= BIT_H;
-        keyRelease(KEY_LEFT);
+    // release all the special key
+    if (IS_LOGIC_KEY_DOWN(BIT_LEFT)) {
+        doKeyEvent(KEY_LEFT, 0);
     }
-    if (IS_KEY_DOWN(BIT_J))
-    {
-        m_skip_key_flags |= BIT_J;
-        keyRelease(KEY_DOWN);
+    if (IS_LOGIC_KEY_DOWN(BIT_DOWN)) {
+        doKeyEvent(KEY_DOWN, 0);
     }
-    if (IS_KEY_DOWN(BIT_K))
-    {
-        m_skip_key_flags |= BIT_K;
-        keyRelease(KEY_UP);
+    if (IS_LOGIC_KEY_DOWN(BIT_UP)) {
+        doKeyEvent(KEY_UP, 0);
     }
-    if (IS_KEY_DOWN(BIT_L))
-    {
-        m_skip_key_flags |= BIT_L;
-        keyRelease(KEY_RIGHT);
+    if (IS_LOGIC_KEY_DOWN(BIT_RIGHT)) {
+        doKeyEvent(KEY_RIGHT, 0);
     }
-    if (IS_KEY_DOWN(BIT_I))
-    {
-        m_skip_key_flags |= BIT_I;
-        keyRelease(KEY_ESC);
+    if (IS_LOGIC_KEY_DOWN(BIT_ESC)) {
+        doKeyEvent(KEY_ESC, 0);
     }
-    if (IS_KEY_DOWN(BIT_LEFTBRACE))
-    {
-        m_skip_key_flags |= BIT_LEFTBRACE;
-        keyRelease(KEY_INSERT);
-        keyRelease(KEY_LEFTSHIFT);
+    if (IS_LOGIC_KEY_DOWN(BIT_INSERT)) {
+        doKeyEvent(KEY_INSERT, 0);
     }
-    keyDown(KEY_LEFTCTRL);
-    m_nav_mode = false;
+    if (IS_LOGIC_KEY_DOWN(BIT_LEFTSHIFT)) {
+        doKeyEvent(KEY_LEFTSHIFT, 0);
+    }
+
+    if (!IS_LOGIC_KEY_DOWN(BIT_LEFTCTRL)) {
+        doKeyEvent(KEY_LEFTCTRL, 1);
+    }
+    m_donghai_mode = false;
 }
 
-
-bool DonghaiConverter::handleSpecialKey(struct input_event* input)
-{
-    int bit = m_special_key_map[input->code];
-
-    if(ONLY_CAPSLOCK_ON() && input->value == 1)
-    {
-        enterNavMode();
+void DonghaiConverter::handleMapKey(struct input_event *key_event, uint16_t map_key_code, int32_t original_bit, int32_t map_bit) {
+    enterDonghaiMode(key_event);
+    if (!m_donghai_mode) {
+        normalKeyOutPut(key_event, original_bit);
+        return;
     }
-
-    if (input->value == 1)
-        m_key_flags |= bit;
-    else if (input->value == 0)
-        m_key_flags &= ~bit;
-
-    if (!m_nav_mode)
-    {
-        addOutput(m_cached_msc_event);
-        addOutput(input);
-        return true;
-    }
-
-    switch (input->code)
-    {
-    case KEY_H:
-        addOutput(getInputEvent(EV_MSC, 4, KEY_LEFT));
-        outputKey(KEY_LEFT, input->value);
-        break;
-    case KEY_J:
-        addOutput(getInputEvent(EV_MSC, 4, KEY_DOWN));
-        outputKey(KEY_DOWN, input->value);
-        break;
-    case KEY_K:
-        addOutput(getInputEvent(EV_MSC, 4, KEY_UP));
-        outputKey(KEY_UP, input->value);
-        break;
-    case KEY_L:
-        addOutput(getInputEvent(EV_MSC, 4, KEY_RIGHT));
-        outputKey(KEY_RIGHT, input->value);
-        break;
-    case KEY_I:
-        handleNavKeyI(input);
-        break;
-    case KEY_LEFTBRACE:
-        addOutput(getInputEvent(EV_MSC, 4, input->code));
-        outputKey(KEY_ESC, input->value);
-        break;
-    }
-
-    return true;
-}
-
-void DonghaiConverter::handleNavKeyI(struct input_event* input)
-{
-    if (input->value == 1)
-    {
-        keyDown(KEY_LEFTSHIFT);
-        keyDown(KEY_INSERT, true, false);
-    }
-    else if (input->value == 2)
-    {
-        addOutput(getInputEvent(EV_MSC, 4, KEY_INSERT));
-        outputKey(KEY_INSERT, 2);
-    }
-    else if (input->value == 0)
-    {
-        keyRelease(KEY_INSERT);
-        keyRelease(KEY_LEFTSHIFT, true, false);
+    if (IS_LOGIC_KEY_DOWN(map_bit)) {
+        if (key_event->value == 1) {
+            return;
+        }
+        doKeyEvent(map_key_code, key_event->value);
+    } else {
+        if (key_event->value == 1) {
+            doKeyEvent(map_key_code, key_event->value);
+        }
     }
 }
 
-void DonghaiConverter::outputKey(unsigned short code, int value)
-{
-    addOutput(getInputEvent(EV_KEY, code, value));
+void DonghaiConverter::handleInsertKey(struct input_event *key_event) {
+    enterDonghaiMode(key_event);
+    if (!m_donghai_mode) {
+        normalKeyOutPut(key_event, BIT_I);
+        return;
+    }
+    if (key_event->value == 1 || key_event->value == 2) {
+        if (!IS_LOGIC_KEY_DOWN(BIT_LEFTSHIFT)) {
+            doKeyEvent(KEY_LEFTSHIFT, 1);
+        }
+        if (!IS_LOGIC_KEY_DOWN(BIT_INSERT)) {
+            doKeyEvent(KEY_INSERT, 1);
+            if (key_event->value == 2) {
+                doKeyEvent(KEY_INSERT, 2);
+            }
+        } else {
+            if (key_event->value == 2) {
+                doKeyEvent(KEY_INSERT, 2);
+            }
+        }
+    } else if (key_event->value == 0) {
+        if (IS_LOGIC_KEY_DOWN(BIT_INSERT)) {
+            doKeyEvent(KEY_INSERT, 0);
+        }
+        if (IS_LOGIC_KEY_DOWN(BIT_LEFTSHIFT)) {
+            doKeyEvent(KEY_LEFTSHIFT, 0);
+        }
+    }
 }
 
-void DonghaiConverter::keyDown(unsigned short code, bool msc, bool syn)
-{
-    if (msc)
-        addOutput(getInputEvent(EV_MSC, 4, code));
-    addOutput(getInputEvent(EV_KEY, code, 1));
-    if (syn)
-        addOutput(getInputEvent(EV_SYN, SYN_REPORT, 0));
+void DonghaiConverter::addOutput(struct input_event *output, bool setTime) {
+    if (output->type == EV_KEY) {
+        updateKeyFlags(&m_logic_key_flags, output->code, output->value);
+    }
+    Converter::addOutput(output, setTime);
 }
 
-void DonghaiConverter::keyRelease(unsigned short code, bool msc, bool syn)
-{
-    if (msc)
-        addOutput(getInputEvent(EV_MSC, 4, code));
-    addOutput(getInputEvent(EV_KEY, code, 0));
-    if (syn)
-        addOutput(getInputEvent(EV_SYN, SYN_REPORT, 0));
+void DonghaiConverter::normalKeyOutPut(struct input_event *key_event, int32_t bit) {
+    if (IS_LOGIC_KEY_DOWN(bit)) {
+        if (key_event->value == 1) {
+            return;
+        }
+        doKeyEvent(key_event->code, key_event->value, true, false);
+        m_send_syn_event = true;
+    } else {
+        if (key_event->value == 1) {
+            doKeyEvent(key_event->code, key_event->value, true, false);
+            m_send_syn_event = true;
+        }
+    }
+    return;
 }
 
-struct input_event * DonghaiConverter::getInputEvent(unsigned short type, unsigned short code, int value)
-{
-    m_input_buffer_index = (m_input_buffer_index + 1) % MAX_INPUT_BUFFER_SIZE;
-    struct input_event * event = &m_input_buffer[m_input_buffer_index];
-    event->type = type;
-    event->code = code;
-    event->value = value;
-    return event;
-}
+
+
+
+

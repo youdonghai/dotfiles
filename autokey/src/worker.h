@@ -12,6 +12,7 @@
 class Worker {
 public:
     Worker(std::string kbd_event_file);
+
     ~Worker();
 
     void run();

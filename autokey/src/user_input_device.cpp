@@ -8,15 +8,13 @@
 #include <linux/uinput.h>
 #include <string.h>
 
-UserInputDevice::UserInputDevice(std::string name)
-{
+UserInputDevice::UserInputDevice(std::string name) {
     m_user_device_fh = -1;
     m_user_device_fh = open(USERDEV_FILENAME, O_WRONLY | O_NONBLOCK);
     if (m_user_device_fh >= 0) {
         ioctl(m_user_device_fh, UI_SET_EVBIT, EV_KEY);
         ioctl(m_user_device_fh, UI_SET_EVBIT, EV_SYN);
-        for (int i = 0; i < 256; i++)
-        {
+        for (int i = 0; i < 256; i++) {
             ioctl(m_user_device_fh, UI_SET_KEYBIT, i);
         }
         struct uinput_user_dev device;
@@ -31,8 +29,7 @@ UserInputDevice::UserInputDevice(std::string name)
     }
 }
 
-UserInputDevice::~UserInputDevice()
-{
+UserInputDevice::~UserInputDevice() {
     if (m_user_device_fh >= 0) {
         releaseAllKeys(m_user_device_fh);
         ioctl(m_user_device_fh, UI_DEV_DESTROY);
@@ -40,20 +37,19 @@ UserInputDevice::~UserInputDevice()
     }
 }
 
-bool UserInputDevice::PutKey(struct input_event* key)
-{
+bool UserInputDevice::PutKey(struct input_event *key) {
     ssize_t len;
     do {
         len = write(m_user_device_fh, key, sizeof(*key));
     } while (len == -1 && errno == EINTR);
 
-    //printf("\t\e[1;31mout:  type %d, code %3d, value %d (%d)\e[0m\n", key->type, key->code, key->value, (int)len);
+    printf("\t\e[1;31mout:  type %d, code %3d, value %d, time %ld (%d)\e[0m\n", key->type, key->code, key->value,
+           key->time.tv_usec, (int)len);
 
-    return (len == (ssize_t)sizeof(*key));
+    return (len == (ssize_t) sizeof(*key));
 }
 
-void UserInputDevice::releaseAllKeys(int fd)
-{
+void UserInputDevice::releaseAllKeys(int fd) {
     struct input_event input;
     memset(&input, 0, sizeof(input));
 
@@ -61,7 +57,7 @@ void UserInputDevice::releaseAllKeys(int fd)
     input.value = 0;
     gettimeofday(&(input.time), NULL);
     for (int i = 0; i < 256; i++) {
-        input.code = i;
+        input.code = (unsigned short) i;
         write(fd, &input, sizeof(input));
     }
 
