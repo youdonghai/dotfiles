@@ -52,7 +52,7 @@ bool DonghaiConverter::handleInput(struct input_event *input) {
         case EV_SYN:
             return handleSynInput(input);
         default:
-            addOutput(input);
+            addOutput(input, false);
             break;
     }
     return true;
@@ -106,7 +106,7 @@ bool DonghaiConverter::handleKeyInput(struct input_event *input) {
 
 bool DonghaiConverter::handleSynInput(struct input_event *input) {
     if (m_send_syn_event) {
-        addOutput(input);
+        addOutput(input, false);
         m_send_syn_event = false;
     }
     return false;
