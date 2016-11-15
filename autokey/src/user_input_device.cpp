@@ -43,8 +43,8 @@ bool UserInputDevice::PutKey(struct input_event *key) {
         len = write(m_user_device_fh, key, sizeof(*key));
     } while (len == -1 && errno == EINTR);
 
-    printf("\t\e[1;31mout:  type %d, code %3d, value %d, time %ld (%d)\e[0m\n", key->type, key->code, key->value,
-           key->time.tv_usec, (int)len);
+    //printf("\t\e[1;31mout:  type %d, code %3d, value %d, time %ld (%d)\e[0m\n", key->type, key->code, key->value,
+    //       key->time.tv_usec, (int)len);
 
     return (len == (ssize_t) sizeof(*key));
 }

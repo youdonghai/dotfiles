@@ -77,7 +77,7 @@ bool KeyboardDevice::getKey(struct input_event *key) {
         len = read(m_kbd_event_fh, key, sizeof(*key));
     } while (len == -1 && errno == EINTR);
 
-    printf("\t in:  type %d, code %3d, value %d (%d)\n", key->type, key->code, key->value, (int) len);
+    //printf("\t in:  type %d, code %3d, value %d (%d)\n", key->type, key->code, key->value, (int) len);
 
     return (len == (ssize_t) sizeof(*key));
 }
