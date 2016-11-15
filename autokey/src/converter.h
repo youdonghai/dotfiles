@@ -31,9 +31,6 @@ protected:
     virtual void addOutput(struct input_event *output, bool setTime = true);
 
     struct input_event *getInputEvent(unsigned short type, unsigned short code, int value);
-    struct input_event *getInputEvent(struct input_event *input);
-    void keyDown(unsigned short code, bool msc = true, bool syn = true);
-    void keyRelease(unsigned short code, bool msc = true, bool syn = true);
     void doKeyEvent(unsigned short code, int val, bool msc = true, bool syn = true);
 
 private:

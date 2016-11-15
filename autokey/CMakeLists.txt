@@ -3,7 +3,7 @@ project(autokey_linux)
 
 find_package(Threads REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -Wno-unused-result")
 
 set(SOURCE_FILES
     src/converter.cpp

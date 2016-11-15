@@ -14,7 +14,6 @@
 #include "stdlib.h"
 
 
-
 class DonghaiConverter : public Converter {
 public:
     DonghaiConverter();

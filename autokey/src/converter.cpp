@@ -44,21 +44,6 @@ struct input_event *Converter::getInputEvent(unsigned short type, unsigned short
     return event;
 }
 
-struct input_event *Converter::getInputEvent(struct input_event *input) {
-    m_input_buffer_index = (m_input_buffer_index + 1) % MAX_INPUT_BUFFER_SIZE;
-    struct input_event *event = &m_input_buffer[m_input_buffer_index];
-    memcpy(event, input, sizeof(struct input_event));
-    return event;
-}
-
-void Converter::keyDown(unsigned short code, bool msc, bool syn) {
-    doKeyEvent(code, 1, msc, syn);
-}
-
-void Converter::keyRelease(unsigned short code, bool msc, bool syn) {
-    doKeyEvent(code, 0, msc, syn);
-}
-
 void Converter::doKeyEvent(unsigned short code, int val, bool msc, bool syn) {
     if (msc)
         addOutput(getInputEvent(EV_MSC, 4, code));

@@ -90,7 +90,7 @@ void KeyboardDevice::releaseAllKeys(int fd) {
     input.value = 0;
     gettimeofday(&(input.time), NULL);
     for (int i = 0; i < 256; i++) {
-        input.code = i;
+        input.code = (uint16_t) i;
         write(fd, &input, sizeof(input));
     }
 
