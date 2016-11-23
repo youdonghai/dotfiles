@@ -10,21 +10,21 @@
 
 - name: install i3 config
   copy:
-    src: files/i3wm_config
+    src: roles/i3wm/files/i3wm_config
     dest: "{{ ansible_env.HOME }}/.config/i3/config"
     mode: 0644
     owner: "{{ ansible_user }}"
 
 - name: install myi3status
   copy:
-    src: files/myi3status
+    src: roles/i3wm/files/myi3status
     dest: "{{ ansible_env.HOME }}/bin/myi3status"
     mode: 0755
     owner: "{{ ansible_user }}"
 
 - name: install xinitrc
   copy:
-    src: files/xinitrc
+    src: roles/i3wm/files/xinitrc
     dest: "{{ ansible_env.HOME }}/.xinitrc"
 
 - name: create Xresources path
@@ -36,14 +36,14 @@
 
 - name: install Xresources config
   copy:
-    src: files/Xresources
+    src: roles/i3wm/files/Xresources
     dest: "{{ ansible_env.HOME }}/.Xresources"
     mode: 0644
     owner: "{{ ansible_user }}"
 
 - name: install Xresources color
   copy:
-    src: files/donghai.dark
+    src: roles/i3wm/files/donghai.dark
     dest: "{{ ansible_env.HOME }}/.Xresources.d/donghai.dark"
     mode: 0644
     owner: "{{ ansible_user }}"

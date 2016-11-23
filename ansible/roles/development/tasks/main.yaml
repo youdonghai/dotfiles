@@ -10,7 +10,7 @@
 
 - name: install to
   copy:
-    src: files/to
+    src: roles/development/files/to
     dest: "{{ ansible_env.HOME }}/bin/to"
     mode: 0744
     owner: "{{ ansible_user }}"
@@ -24,42 +24,28 @@
 
 - name: install ssh config
   copy:
-    src: files/ssh_config
+    src: roles/development/files/ssh_config
     dest: "{{ ansible_env.HOME }}/.ssh/config"
     mode: 0644
     owner: "{{ ansible_user }}"
 
-- name: install tmux config
-  copy:
-    src: files/tmux.conf
-    dest: "{{ ansible_env.HOME }}/.tmux.conf"
-    mode: 0644
-    owner: "{{ ansible_user }}"
-
-- name: install tmux init script
-  copy:
-    src: files/tmuxinit
-    dest: "{{ ansible_env.HOME }}/bin/tmuxinit"
-    mode: 0744
-    owner: "{{ ansible_user }}"
-
 - name: install ideavimrc
   copy:
-    src: files/ideavimrc
+    src: roles/development/files/ideavimrc
     dest: "{{ ansible_env.HOME }}/.ideavimrc"
     mode: 0644
     owner: "{{ ansible_user }}"
 
 - name: install gencert
   copy:
-    src: files/gencert.sh
+    src: roles/development/files/gencert.sh
     dest: "{{ ansible_env.HOME }}/bin/gencert.sh"
     mode: 0744
     owner: "{{ ansible_user }}"
 
 - name: install delete merged branch script
   copy:
-    src: files/delete_merged_branchs
+    src: roles/development/files/delete_merged_branchs
     dest: "{{ ansible_env.HOME }}/bin/delete_merged_branchs"
     mode: 0744
     owner: "{{ ansible_user }}"

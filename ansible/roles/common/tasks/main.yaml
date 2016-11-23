@@ -4,4 +4,5 @@
 - include: basic.yaml
 - include: zsh.yaml
 - include: vim.yaml
+- include: tmux.yaml
 

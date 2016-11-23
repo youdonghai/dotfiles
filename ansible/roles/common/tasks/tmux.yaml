@@ -1,0 +1,18 @@
+# vim:ft=ansible:
+---
+
+- name: install tmux config
+  copy:
+    src: roles/common/files/tmux.conf
+    dest: "{{ ansible_env.HOME }}/.tmux.conf"
+    mode: 0644
+    owner: "{{ ansible_user }}"
+
+- name: install tmux init script
+  copy:
+    src: roles/common/files/tmuxinit
+    dest: "{{ ansible_env.HOME }}/bin/tmuxinit"
+    mode: 0744
+    owner: "{{ ansible_user }}"
+
+

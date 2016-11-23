@@ -1,5 +1,5 @@
 [development]
-localhost ansible_user=youdonghai
+localhost
 
 [test]
 
