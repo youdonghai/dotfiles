@@ -1,6 +1,13 @@
 # vim:ft=ansible:
 ---
 
+- name: create bin dir
+  file:
+    dest: "{{ ansible_env.HOME }}/bin"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+
 - name: install git
   become: true
   package:
