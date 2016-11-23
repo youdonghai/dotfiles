@@ -1,6 +1,12 @@
 # vim:ft=ansible:
 ---
 
+- name: install tmux
+  become: true
+  package:
+    name: tmux
+    state: present
+
 - name: install tmux config
   copy:
     src: roles/common/files/tmux.conf
