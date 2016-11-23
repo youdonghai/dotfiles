@@ -1,0 +1,8 @@
+[Unit]
+Description=DonghaiAutoKey
+
+[Service]
+ExecStart=/home/donghai/bin/autokey > /dev/null 2>&1
+
+[Install]
+WantedBy=multi-user.target
