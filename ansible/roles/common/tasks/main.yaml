@@ -3,6 +3,7 @@
 
 - include: basic.yaml
 - include: zsh.yaml
-- include: vim.yaml
+  #- include: vim.yaml
+- include: neovim.yaml
 - include: tmux.yaml
 

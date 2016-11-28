@@ -1,9 +1,11 @@
 set clipboard+=unnamed
-set scrolloff=5
+set scrolloff=6
 set hlsearch
 set ignorecase
 set incsearch
+set smartcase
 set number
 set relativenumber
 set visualbell
 set noerrorbells
+set matchpairs
