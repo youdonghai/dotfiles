@@ -84,6 +84,8 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
 
+alias vim=nvim
+
 setopt no_share_history
 
 export PATH=${HOME}/bin/:$PATH

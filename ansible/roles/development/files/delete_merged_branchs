@@ -1,8 +1,12 @@
 #! /bin/bash
 
+set -e
+
+git checkout master
+
 for BRANCH in `git branch --merged | egrep -v "(^\*|master|dev|test|development)"`
 do
-    echo $BRANCH
+    echo "start delete branch: "$BRANCH
     git branch -d $BRANCH
     git push origin --delete $BRANCH
 done

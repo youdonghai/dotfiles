@@ -30,6 +30,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
 Plug 'fatih/vim-go'
 Plug 'chase/vim-ansible-yaml'
+Plug 'mhinz/vim-signify'
 call plug#end()
 
 nmap <leader>t :TagbarToggle<CR>
