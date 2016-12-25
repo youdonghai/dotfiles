@@ -84,7 +84,8 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #
 
-alias vim=nvim
+alias vim='nvim'
+alias sudo='sudo '
 
 setopt no_share_history
 
@@ -95,9 +96,9 @@ export PATH=$PATH:$GOROOT/bin
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.gotools
 
-#if [ -x /usr/bin/dircolors  ]; then
-#    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-#fi
+if [ -x /usr/bin/dircolors  ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+fi
 
 setopt autolist
 unsetopt menucomplete
