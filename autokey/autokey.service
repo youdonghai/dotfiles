@@ -3,6 +3,7 @@ Description=DonghaiAutoKey
 
 [Service]
 ExecStart=/home/donghai/bin/autokey > /dev/null 2>&1
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
