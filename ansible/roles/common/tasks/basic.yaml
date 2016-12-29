@@ -14,9 +14,3 @@
     name: git
     state: present
 
-- name: install wget
-  become: true
-  package:
-    name: wget
-    state: present
-

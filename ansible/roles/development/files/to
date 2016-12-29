@@ -7,7 +7,7 @@ DEFAULT_PORT=22
 ALL_HOST=`ls ${HOME}/${HOST_PATH}/* | awk -F/ '{print $NF}' |  tr "\n" "|"`
 
 if [ -z "$1" ];then
-    tmux setw automatic-rename > /dev/null
+    tmux setw automatic-rename > /dev/null 2>&1
     echo "usage: to <host> [user] [passwd] [port]"
     echo "       to <host_type> <host_index>"
     echo "default user=${DEFAULT_USER}"
@@ -41,12 +41,12 @@ if [ -z "${SSH_USER}" ];then
     SSH_USER=${DEFAULT_USER}
 fi
 
-tmux rename-window ${SSH_HOST}
+tmux rename-window ${SSH_HOST} > /dev/null 2>&1
 if [ -z "${SSH_PASS}" ];then
     ssh -p ${SSH_PORT} -l ${SSH_USER} ${SSH_HOST}
 else
     export SSH_PASS
     dhssh ${SSH_HOST} ${SSH_USER} ${SSH_PORT}
 fi
-tmux setw automatic-rename > /dev/null
+tmux setw automatic-rename > /dev/null 2>&1
 
