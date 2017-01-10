@@ -85,7 +85,7 @@ source $ZSH/oh-my-zsh.sh
 #
 
 alias vim='nvim'
-alias sudo='sudo '
+alias sudo='sudo -E '
 
 setopt no_share_history
 
@@ -96,7 +96,7 @@ export PATH=$PATH:$GOROOT/bin
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.gotools
 
-if [ -x /usr/bin/dircolors  ]; then
+if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
 fi
 
@@ -110,4 +110,8 @@ bindkey -v
 bindkey '^R' history-incremental-search-backward
 
 eval "$(thefuck --alias)"
+
+if [ -e ${HOME}/.zshenv ]; then
+    source ${HOME}/.zshenv
+fi
 
