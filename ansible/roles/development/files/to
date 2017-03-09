@@ -45,8 +45,8 @@ tmux rename-window ${SSH_HOST} > /dev/null 2>&1
 if [ -z "${SSH_PASS}" ];then
     ssh -p ${SSH_PORT} -l ${SSH_USER} ${SSH_HOST}
 else
-    export SSH_PASS
-    dhssh ${SSH_HOST} ${SSH_USER} ${SSH_PORT}
+    export SSHPASS=${SSH_PASS}
+    sshpass -e ssh -p ${SSH_PORT} -l ${SSH_USER} ${SSH_HOST}
 fi
 tmux setw automatic-rename > /dev/null 2>&1
 
