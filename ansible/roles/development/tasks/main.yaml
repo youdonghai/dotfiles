@@ -8,13 +8,6 @@
     mode: 0755
     owner: "{{ ansible_user }}"
 
-- name: install dhssh
-  copy:
-    src: roles/development/files/dhssh
-    dest: "{{ ansible_env.HOME }}/bin/dhssh"
-    mode: 0744
-    owner: "{{ ansible_user }}"
-
 - name: install to
   copy:
     src: roles/development/files/to
