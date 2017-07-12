@@ -1,0 +1,169 @@
+#! /usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+import os
+import sys
+import pexpect
+import getpass
+import logging
+from os.path import expanduser
+
+logging.basicConfig(level=logging.WARN)
+win_size_rows, win_size_columns = os.popen('stty size', 'r').read().split()
+
+jump_server_login_success_string = '' # TODO
+jump_server_address = '' # TODO
+
+
+def ssh_to_jump_server():
+    login_need_token_string = 'please enter your password'
+    login_command = 'luit -encoding UTF-8 ' \
+                    'ssh -o ServerAliveInterval=60 -p 22 ' \
+                    '-l donghai.ydh ' + jump_server_address
+    session = pexpect.spawn(command=login_command, ignore_sighup=True)
+    session.setwinsize(int(win_size_rows), int(win_size_columns))
+    index = session.expect([login_need_token_string, jump_server_login_success_string, pexpect.TIMEOUT])
+    if 0 == index:
+        logging.info('first try to login jumper server, need token')
+        session.sendline(get_pass_word() + get_token())
+        index = session.expect([jump_server_login_success_string, pexpect.TIMEOUT])
+        if 0 == index:
+            logging.info('second try to login jumper server success')
+            return session
+        elif 1 == index:
+            sys.stderr.writelines('login jumper server timeout')
+            return None
+    elif 1 == index:
+        logging.info('first try to login jumper server success')
+        return session
+    elif 2 == index:
+        sys.stderr.writelines('login jumper server timeout')
+        return None
+    return None
+
+
+def get_token():
+    token = getpass.getpass('please input token: ')
+    logging.debug('token is %s', token)
+    return token
+
+
+def get_pass_word():
+    pass_word_file = expanduser('~') + '/.ssh_pass'
+    logging.debug('pass word file is %s', pass_word_file)
+    with open(pass_word_file, 'r') as f:
+        pw = f.readline().strip()
+        logging.debug('pass word is %s', pw)
+        return pw
+
+
+def ssh_to_log_server(session):
+    login_need_password_string = 'password'
+    login_success_string = 'sudo -u log -s'
+    session.sendline('ssh log-40-1')
+    index = session.expect([login_need_password_string, pexpect.TIMEOUT])
+    if 0 == index:
+        session.sendline(get_pass_word())
+        index = session.expect([login_success_string, pexpect.TIMEOUT])
+        if 0 == index:
+            logging.info('login to log server success')
+            return session
+    sys.stderr.writelines('login to log server timeout')
+    return None
+
+
+def change_user_on_log_server(session):
+    change_user_success_string = 'change_to_user_log_success'
+    session.sendline('sudo -u log -s && echo %s' % change_user_success_string)
+    index = session.expect([change_user_success_string, pexpect.TIMEOUT])
+    if 0 == index:
+        logging.info('change user to log success')
+        return session
+    sys.stderr.writelines('change user to log timeout')
+    return None
+
+
+def ssh_to_target_server(session, host):
+    login_target_server_unknown_host = 'Name or service not known'
+    login_target_server_success_string = 'Last login:'
+    session.sendline('ssh %s' % host)
+    session.expect([login_target_server_success_string, login_target_server_unknown_host, pexpect.TIMEOUT])
+    if 0 == session.match_index:
+        logging.info('login target server success')
+        return True, session
+    elif 1 == session.match_index:
+        sys.stderr.writelines('login target server failed: ' + login_target_server_unknown_host)
+        return False, session
+    else:
+        sys.stderr.writelines('login target server timeout')
+    return False, session
+
+
+HOSTS_PATH = '/hosts/'
+
+
+def get_host_type_set():
+    hosts_path = expanduser('~') + HOSTS_PATH
+    host_type_set = set([f for f in os.listdir(hosts_path)])
+    logging.info('host type set %s' % str(host_type_set))
+    return host_type_set
+
+
+def get_host(host_type, index):
+    host_file = expanduser('~') + HOSTS_PATH + host_type
+    logging.debug('host file is %s, index %d' % (host_file, index))
+    host = None
+    index -= 1
+    if index < 0:
+        index = 0
+    with open(host_file, 'r') as f:
+        for i, line in enumerate(f):
+            if index == i:
+                host = line.strip()
+    return host
+
+
+def get_host_specify_command(host):
+    command_list = []
+    if 'recse' in host:
+        command_list.append('cd logs/recse')
+        command_list.append("tail -f solutions-*.log | grep '9678|'")
+    elif 'recproxy' in host:
+        command_list.append('cd logs/recproxy')
+    return command_list
+
+
+def send_host_specify_command(session, command_list):
+    for c in command_list:
+        session.sendline(c)
+
+
+def get_target_host():
+    host = None
+    if len(sys.argv) > 1:
+        host = sys.argv[1]
+        host_type_set = get_host_type_set()
+        if host in host_type_set:
+            if len(sys.argv) < 3:
+                sys.stderr.writelines("please input host index")
+                return
+            index = int(sys.argv[2])
+            host = get_host(host, index)
+    logging.info('host is %s' % host)
+    return host
+
+
+def main_go_to():
+    host = get_target_host()
+    s = ssh_to_jump_server()
+    s = ssh_to_log_server(s)
+    s = change_user_on_log_server(s)
+    if host is not None:
+        r, s = ssh_to_target_server(s, host)
+        if r:
+            send_host_specify_command(s, get_host_specify_command(host))
+    s.interact()
+
+
+if __name__ == '__main__':
+    main_go_to()
